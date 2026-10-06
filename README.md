@@ -1,37 +1,155 @@
-# Nexus control server
+```markdown
+# Nexus
 
-Nexus is a small chaos-engineering control plane for a Dockerized web application. It can stop target services, simulate monitored latency, diagnose failures, create an isolated backend sandbox, validate it, and only then repair production.
+### Deterministic Self-Healing Infrastructure
 
-## Run
+Nexus is a Docker-based self-healing platform that detects controlled application failures, applies the appropriate recovery action, and verifies that the system has recovered.
 
-1. Copy `backend/.env.example` to `backend/.env`. Set `OPENAI_API_KEY` to a real key before starting; Nexus stops with a clear configuration error when it is missing. Do not commit this file.
-2. From this directory, run `docker compose up --build`.
-3. Open the dashboard at `http://localhost:8080`. It proxies its API calls to the control API at `http://localhost:5000`; the bundled Compose file includes safe demo target containers.
+The project demonstrates the core self-healing loop:
 
-For local development, run `npm install` then `npm run dev` from `backend` for the control API, and from `frontend` for the React dashboard. Every backend setting is loaded through `backend/config.js`; edit `.env`, not source files. Docker access is required for container operations; without it, status reports the targets as unavailable rather than crashing the server.
+**Break → Detect → Repair → Verify**
 
-## API
+---
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| GET | `/health` | Control-server liveness |
-| GET | `/api/status` | Target containers and health summary |
-| POST | `/api/break/backend` | Stop the target backend |
-| POST | `/api/break/database` | Stop the target database |
-| POST | `/api/break/latency` | Enable monitored latency simulation (`{ "delayMs": 2000 }`) |
-| GET | `/api/diagnostics` | Failure diagnosis and evidence |
-| POST | `/api/sandbox/create` | Create an isolated backend sandbox |
-| POST | `/api/sandbox/validate` | Validate the current sandbox |
-| POST | `/api/rebuild` | Diagnose, validate, and repair production |
-| GET | `/api/timeline` | In-memory recovery event history |
-| POST | `/api/ai/analyze` | Optional GPT-5 diagnosis from status, health checks, and logs |
+## Features
 
-Structured JSON logs are written to `backend/logs/nexus.log`. The monitor samples target state every five seconds and records state transitions in the timeline.
+- 🔴 **Backend Failure** — stops the target backend and automatically restarts it.
+- 🗄️ **Database Failure** — stops PostgreSQL and restores it when Rebuild is triggered.
+- ⏱️ **Latency Injection** — introduces artificial latency and removes it during recovery.
+- 🔄 **Automatic Rebuild** — detects the current failure and applies the correct fix.
+- ✅ **Recovery Verification** — confirms the service is actually healthy after recovery.
+- 📜 **Recovery Timeline** — shows what happened during the recovery process.
+- 🐳 **Dockerized** — the complete system runs through Docker Compose.
 
-## AI diagnosis
+---
 
-Nexus uses the OpenAI Responses API with GPT-5 only to explain a failure and suggest a repair plan. The rebuild workflow is deterministic: it never waits for, or executes, an AI recommendation.
+## How It Works
 
-## End-to-end check
+```text
+       Failure Injected
+              ↓
+      Detect the Failure
+              ↓
+     Identify Failure Type
+              ↓
+        Apply Fix
+              ↓
+      Verify Recovery
+              ↓
+           Healthy
+```
 
-After the stack is healthy, run `npm run test:integration` from `backend`. The script checks discovery and status, stops the backend, confirms the failure, runs the recovery workflow, then creates, validates, and removes a sandbox. Its JSON report is suitable for CI logs.
+Nexus supports three controlled failure scenarios:
+
+| Failure | Recovery |
+|---|---|
+| Backend stopped | Start backend + verify health |
+| Database stopped | Start database + verify connectivity |
+| High latency | Reset latency + verify response time |
+
+---
+
+## Architecture
+
+```text
+                  Nexus Dashboard
+                         │
+                         ▼
+                 Nexus Backend
+                    Express.js
+                         │
+                  Docker Socket
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+     Frontend         Backend        PostgreSQL
+       Nginx          Express          Database
+```
+
+### Tech Stack
+
+- **Frontend:** React + Vite
+- **Backend:** Node.js + Express
+- **Database:** PostgreSQL
+- **Infrastructure:** Docker + Docker Compose
+- **Docker Control:** Dockerode
+- **Web Server:** Nginx
+
+---
+
+## Getting Started
+
+### Requirements
+
+- Docker Desktop
+- Git
+
+### Run
+
+```bash
+git clone <YOUR_REPOSITORY_URL>
+cd nexus
+docker compose up --build
+```
+
+Open:
+
+```text
+http://localhost:8080
+```
+
+---
+
+## Demo
+
+1. Start Nexus and confirm the system is **Healthy**.
+2. Click **Break Backend**, **Break Database**, or **Inject Latency**.
+3. Observe the system becoming unhealthy.
+4. Click **Rebuild**.
+5. Nexus detects the failure and applies the corresponding recovery.
+6. Nexus verifies the recovery and returns the system to **Healthy**.
+
+The recovery can be repeated without restarting the entire application:
+
+```text
+Break → Rebuild → Healthy
+Break → Rebuild → Healthy
+Break → Rebuild → Healthy
+```
+
+---
+
+## Safety
+
+Nexus does not consider a service recovered simply because its Docker container is running.
+
+Recovery is only successful after verification:
+
+- Backend → health and API checks
+- Database → database connectivity
+- Latency → fresh response-time check
+
+> **Recovery is not complete until it has been verified.**
+
+---
+
+## Project Scope
+
+Nexus is a **portfolio MVP** focused on deterministic self-healing.
+
+It intentionally does not use Kubernetes, Prometheus, Grafana, Redis, Kafka, or other unnecessary infrastructure.
+
+The goal is to demonstrate the fundamental concept clearly:
+
+> **Detect a failure, fix it automatically, and prove that the fix worked.**
+
+---
+
+## Author
+
+**Archit**
+
+Built as a portfolio project exploring resilient systems, Docker automation, and self-healing infrastructure.
+```
+
+This is the version I'd actually put on GitHub. It's **short enough to read in 1–2 minutes**, but still tells a recruiter/interviewer what Nexus is, how it works, what technologies you used, and how to run the demo.
