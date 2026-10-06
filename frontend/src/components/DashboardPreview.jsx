@@ -29,7 +29,6 @@ export default function DashboardPreview() {
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [rebuildResult, setRebuildResult] = useState(null);
-  const [forceSandboxFail, setForceSandboxFail] = useState(false);
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -62,35 +61,6 @@ export default function DashboardPreview() {
       setNotice(error.message);
     } finally {
       setBusy(false);
-    }
-  };
-
-  const triggerAiAnalysis = async () => {
-    setAnalyzing(true);
-    setAiAnalysis(null);
-    try {
-      const response = await nexusApi.analyze();
-      if (response.success && response.analysis) {
-        setAiAnalysis(response.analysis);
-        setNotice('AI Diagnosis completed.');
-      } else {
-        setNotice('Failed to obtain AI diagnosis.');
-      }
-    } catch (error) {
-      setNotice(error.message);
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
-  const handleForceFailToggle = async (e) => {
-    const val = e.target.checked;
-    setForceSandboxFail(val);
-    try {
-      await nexusApi.toggleForceFail(val);
-      setNotice(`Forced sandbox failure: ${val ? 'ON' : 'OFF'}`);
-    } catch (err) {
-      setNotice(`Failed to toggle sandbox fail: ${err.message}`);
     }
   };
 
@@ -202,7 +172,7 @@ export default function DashboardPreview() {
                   <div className="font-bold text-on-surface text-sm">Active Incident Detected</div>
                   <p className="text-on-surface-variant text-xs mt-1">
                     System is currently <strong className="text-error font-extrabold">{status.overallStatus.toUpperCase()}</strong>.
-                    Run <strong className="text-primary font-bold">AI Diagnose</strong> to analyze root cause, or click <strong className="text-emerald-400 font-bold">Rebuild</strong> to trigger sandbox recovery.
+                    Click <strong className="text-emerald-400 font-bold">Rebuild</strong> to trigger deterministic self-healing recovery.
                   </p>
                 </div>
               </div>
@@ -357,7 +327,7 @@ export default function DashboardPreview() {
                     <button
                       type="button"
                       onClick={() => runAction(nexusApi.breakBackend, 'Backend container stopped.')}
-                      disabled={busy || analyzing}
+                      disabled={busy}
                       className="bg-error/10 border border-error/30 text-error hover:bg-error/20 active:scale-95 disabled:opacity-50 rounded-lg p-2.5 flex flex-col items-center justify-center text-center transition-all font-label-sm text-[11px]"
                     >
                       <Icon name="warning" className="mb-1" size={18} />
@@ -366,7 +336,7 @@ export default function DashboardPreview() {
                     <button
                       type="button"
                       onClick={() => runAction(nexusApi.breakDatabase, 'Database container stopped.')}
-                      disabled={busy || analyzing}
+                      disabled={busy}
                       className="bg-error/10 border border-error/30 text-error hover:bg-error/20 active:scale-95 disabled:opacity-50 rounded-lg p-2.5 flex flex-col items-center justify-center text-center transition-all font-label-sm text-[11px]"
                     >
                       <Icon name="dns" className="mb-1" size={18} />
@@ -375,7 +345,7 @@ export default function DashboardPreview() {
                     <button
                       type="button"
                       onClick={() => runAction(() => nexusApi.enableLatency(3000), 'Latency mode injected (3s delay).')}
-                      disabled={busy || analyzing}
+                      disabled={busy}
                       className="bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 active:scale-95 disabled:opacity-50 rounded-lg p-2.5 flex flex-col items-center justify-center text-center transition-all font-label-sm text-[11px]"
                     >
                       <Icon name="speed" className="mb-1" size={18} />
@@ -383,111 +353,42 @@ export default function DashboardPreview() {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 pt-1">
+                  <div className="pt-1">
                     <button
                       type="button"
                       onClick={() => runAction(nexusApi.rebuild, 'Deterministic repair workflow completed.', true)}
-                      disabled={busy || analyzing}
-                      className="btn-primary font-label-md text-xs font-semibold px-4 py-3 rounded-lg text-white flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 transition-all"
+                      disabled={busy}
+                      className="w-full btn-primary font-label-md text-xs font-semibold px-4 py-3 rounded-lg text-white flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 transition-all"
                     >
                       <Icon name="sync" size={18} />
                       {busy ? 'Working…' : 'Rebuild'}
                     </button>
-                    <button
-                      type="button"
-                      onClick={triggerAiAnalysis}
-                      disabled={busy || analyzing}
-                      className="btn-secondary font-label-md text-xs font-semibold px-4 py-3 rounded-lg text-on-surface flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 transition-all"
-                    >
-                      <Icon name="psychology" size={18} />
-                      {analyzing ? 'Analyzing…' : 'AI Diagnose'}
-                    </button>
-                  </div>
-
-                  <div className="pt-2 border-t border-white/5">
-                    <label className="flex items-center gap-2 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={forceSandboxFail}
-                        onChange={handleForceFailToggle}
-                        className="w-3.5 h-3.5 rounded border-white/10 bg-surface-container text-primary focus:ring-primary"
-                      />
-                      <span className="text-[11px] text-on-surface-variant font-label-sm">Force Sandbox Failure (Test Mode)</span>
-                    </label>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Sandbox Validation Report Panel */}
+            {/* Rebuild Report Panel */}
             {rebuildResult && (
               <div className={`glass-panel p-4 rounded-xl border ${rebuildResult.success ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-error/20 bg-error/5'} transition-all duration-300`}>
                 <div className="flex items-center gap-2 font-label-md text-label-md font-bold text-on-surface mb-2">
                   <Icon name={rebuildResult.success ? 'check_circle' : 'cancel'} className={rebuildResult.success ? 'text-emerald-400' : 'text-error'} />
-                  Sandbox Validation & Recovery Report
+                  Deterministic Rebuild & Self-Healing Report
                 </div>
                 <div className="space-y-2 text-xs font-label-sm">
                   <div className="flex justify-between">
-                    <span>Target Incident:</span>
-                    <span className="text-on-surface font-semibold">{rebuildResult.diagnosis?.probableCause || 'Unknown'}</span>
+                    <span>Failure Type Detected:</span>
+                    <span className="text-on-surface font-semibold">{rebuildResult.failureType || rebuildResult.diagnosis?.probableCause || 'NONE'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Sandbox State:</span>
-                    <span className={rebuildResult.validation?.result === 'PASS' ? 'text-emerald-400 font-bold' : 'text-error font-bold'}>
-                      Validation {rebuildResult.validation?.result || 'FAIL'}
-                    </span>
+                    <span>Applied Fix:</span>
+                    <span className="text-on-surface font-semibold">{rebuildResult.appliedFix || rebuildResult.message || '—'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Production Restored:</span>
-                    <span className={rebuildResult.productionRestored ? 'text-emerald-400 font-bold' : 'text-error font-bold'}>
-                      {rebuildResult.productionRestored ? 'SUCCESS' : 'FAILED'}
+                    <span>Recovery Verification:</span>
+                    <span className={rebuildResult.verified ? 'text-emerald-400 font-bold' : 'text-error font-bold'}>
+                      {rebuildResult.verified ? 'PASS (System Healthy)' : 'FAIL'}
                     </span>
-                  </div>
-
-                  {rebuildResult.validation?.checks && (
-                    <div className="mt-3 pt-3 border-t border-white/5">
-                      <span className="font-bold text-on-surface">Validation Checks:</span>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
-                        {rebuildResult.validation.checks.map((check, idx) => (
-                          <div key={idx} className="flex items-center gap-1.5 bg-surface-container-highest/20 p-1.5 rounded">
-                            <Icon
-                              name={check.status === 'PASS' ? 'check' : 'close'}
-                              size={14}
-                              className={check.status === 'PASS' ? 'text-emerald-400' : 'text-error'}
-                            />
-                            <span className="text-[10px] text-on-surface-variant font-semibold">{check.name}: {check.status}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* AI Diagnosis Report Panel */}
-            {aiAnalysis && (
-              <div className="glass-panel p-4 rounded-xl border border-primary/20 bg-primary/5 transition-all duration-300">
-                <div className="flex items-center gap-2 font-label-md text-label-md font-bold text-primary mb-2">
-                  <Icon name="psychology" size={20} />
-                  AI SRE Diagnosis Report
-                </div>
-                <div className="space-y-2 text-xs font-label-sm leading-normal">
-                  <div>
-                    <span className="font-bold text-on-surface">Diagnosis: </span>
-                    <span className="text-on-surface-variant">{aiAnalysis.diagnosis}</span>
-                  </div>
-                  <div>
-                    <span className="font-bold text-on-surface">Root Cause: </span>
-                    <span className="text-on-surface-variant">{aiAnalysis.rootCause}</span>
-                  </div>
-                  <div>
-                    <span className="font-bold text-on-surface">Recommended Actions:</span>
-                    <ol className="list-decimal list-inside mt-1 space-y-1 text-on-surface-variant">
-                      {aiAnalysis.repairPlan?.map((step, idx) => (
-                        <li key={idx}>{step}</li>
-                      ))}
-                    </ol>
                   </div>
                 </div>
               </div>
