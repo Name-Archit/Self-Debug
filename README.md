@@ -1,7 +1,7 @@
 ```markdown
-Nexus
+NEXUS
 
-Deterministic Self-Healing Infrastructure
+DETERMINISTIC SELF-HEALING INFRASTRUCTURE
 
 Nexus is a Docker-based self-healing platform that detects controlled application failures, applies the appropriate recovery action, and verifies recovery.
 
