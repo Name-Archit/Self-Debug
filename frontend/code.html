@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NovaCloud - Build resilient infrastructure</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #050816;
+            background-image: radial-gradient(circle at 50% -20%, rgba(37, 99, 235, 0.15) 0%, rgba(5, 8, 22, 1) 50%);
+            background-attachment: fixed;
+            color: #e1e2ed;
+        }
+        
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .glass-card {
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-nav {
+            background: rgba(17, 24, 39, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 20px rgba(180, 197, 255, 0.5);
+        }
+
+        .primary-gradient-text {
+            background: linear-gradient(to right, #b4c5ff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #0053db);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3), inset 0 1px 1px rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 15px 25px -5px rgba(37, 99, 235, 0.5), inset 0 1px 1px rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        @keyframes float-1 {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+        @keyframes float-2 {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(-2deg); }
+        }
+        @keyframes float-3 {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+        }
+        
+        .animate-float-1 { animation: float-1 6s ease-in-out infinite; }
+        .animate-float-2 { animation: float-2 8s ease-in-out infinite reverse; }
+        .animate-float-3 { animation: float-3 7s ease-in-out infinite; }
+        
+        /* Custom Chart Styles */
+        .chart-line {
+            stroke: url(#blue-gradient);
+            stroke-width: 2;
+            fill: none;
+            filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.5));
+        }
+        .chart-area {
+            fill: url(#area-gradient);
+            opacity: 0.2;
+        }
+        .chart-grid {
+            stroke: rgba(255,255,255,0.05);
+            stroke-dasharray: 4 4;
+            stroke-width: 1;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#ffb596",
+                        "surface-bright": "#373942",
+                        "primary-container": "#2563eb",
+                        "on-secondary-fixed-variant": "#004395",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#360f00",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "inverse-primary": "#0053db",
+                        "on-surface": "#e1e2ed",
+                        "inverse-on-surface": "#2e3039",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "error-container": "#93000a",
+                        "outline-variant": "#434655",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-background": "#e1e2ed",
+                        "on-surface-variant": "#c3c6d7",
+                        "on-primary-container": "#eeefff",
+                        "on-error": "#690005",
+                        "outline": "#8d90a0",
+                        "on-tertiary": "#581e00",
+                        "surface-container": "#1d1f27",
+                        "on-secondary-container": "#e6ecff",
+                        "on-tertiary-container": "#ffede6",
+                        "surface": "#11131b",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "surface-container-highest": "#32343d",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#adc6ff",
+                        "surface-tint": "#b4c5ff",
+                        "on-secondary-fixed": "#001a42",
+                        "background": "#11131b",
+                        "surface-dim": "#11131b",
+                        "primary": "#b4c5ff",
+                        "surface-container-lowest": "#0c0e16",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "surface-variant": "#32343d",
+                        "secondary-container": "#0566d9",
+                        "on-primary": "#002a78",
+                        "tertiary-container": "#bc4800",
+                        "inverse-surface": "#e1e2ed",
+                        "on-primary-fixed": "#00174b",
+                        "on-secondary": "#002e6a",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-container-high": "#282a32",
+                        "surface-container-low": "#191b23",
+                        "primary-fixed": "#dbe1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "card-padding": "24px",
+                        "panel-gap": "24px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "48px",
+                        "container-max": "1440px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "label-sm": ["Geist"],
+                        "display-lg-mobile": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "label-md": ["Geist"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "display-lg-mobile": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["72px", { "lineHeight": "80px", "letterSpacing": "-0.04em", "fontWeight": "700" }]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-body-md text-on-surface antialiased overflow-x-hidden relative">
+<!-- Top Navigation -->
+<header class="bg-surface/40 dark:bg-surface/40 backdrop-blur-xl font-headline-lg text-headline-lg fixed top-0 w-full z-50 shadow-2xl flex justify-between items-center px-gutter py-4 max-w-container-max mx-auto left-0 right-0">
+<div class="flex items-center gap-3">
+<img alt="NovaCloud Logo" class="h-8 w-8 rounded-md" src="https://lh3.googleusercontent.com/aida/AP1WRLtEyemXoQcKyf6akWpBrqCzwkym1vS3C-j7lYeVcwkYANjxnToG8_a9xmVfbt5P-IDUbejYBDS9ORoBVRhLNmYSuAtzsyFk2SHqa3N8wrP2oX0fEuhgzC4UlyzgUsHz7FfRWyR9Wh7olIOp7sMSSC_EAVFGewo6GSOKHoAL2zZt9nnW4QiArV12TM07FAoyW_G_rpqmseeNMsRA-Dimvhnb4w6x4gkUSeAGycm66b3ZReWSffiB9BW2ZP0"/>
+<span class="font-display-lg-mobile text-display-lg-mobile font-bold tracking-tighter text-on-surface dark:text-on-surface text-2xl">NovaCloud</span>
+</div>
+<nav class="hidden md:flex items-center gap-8 font-label-md text-label-md">
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors px-3 py-2 rounded-lg" href="#">Products</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors px-3 py-2 rounded-lg" href="#">Infrastructure</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors px-3 py-2 rounded-lg" href="#">Pricing</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors px-3 py-2 rounded-lg" href="#">Docs</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="hidden md:block btn-secondary font-label-md text-label-md px-4 py-2 rounded-full text-on-surface">Log In</button>
+<button class="btn-primary font-label-md text-label-md px-6 py-2 rounded-full text-white active:scale-95 duration-200">Get Started</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-32 pb-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto min-h-screen relative">
+<!-- Hero Section -->
+<section class="text-center max-w-4xl mx-auto mb-24 relative z-10">
+<div class="inline-block px-4 py-1 rounded-full bg-primary-container/20 border border-primary-container/30 text-primary font-label-sm text-label-sm mb-6 uppercase tracking-wider">
+                Platform 2.0 Now Available
+            </div>
+<h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg mb-6 primary-gradient-text glow-text leading-tight">
+                Build resilient<br/>infrastructure.<br/>Recover instantly.
+            </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto">
+                Powerful, automated deployment and recovery for modern engineering teams. Trusted by leading enterprises to keep their critical systems online.
+            </p>
+<div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+<button class="btn-primary font-label-md text-label-md px-8 py-4 rounded-full text-white w-full sm:w-auto">Start Free Trial</button>
+<button class="btn-secondary font-label-md text-label-md px-8 py-4 rounded-full text-on-surface w-full sm:w-auto flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 20px;">play_circle</span>
+                    Watch Demo
+                </button>
+</div>
+<!-- Floating Metric Cards (Abstract representation of cards around hero) -->
+<div class="hidden lg:block absolute inset-0 pointer-events-none">
+<!-- Card 1 -->
+<div class="glass-card animate-float-1 absolute top-[10%] left-[-15%] p-4 rounded-xl w-48 rotate-[-5deg]">
+<div class="font-label-sm text-label-sm text-on-surface-variant mb-1 flex justify-between"><span>Uptime</span><span class="text-primary material-symbols-outlined" style="font-size: 16px;">check_circle</span></div>
+<div class="font-headline-lg text-headline-lg text-primary">99.99%</div>
+<div class="w-full h-1 bg-surface-container mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-full"></div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="glass-card animate-float-2 absolute top-[60%] left-[-5%] p-4 rounded-xl w-48 rotate-[3deg]">
+<div class="font-label-sm text-label-sm text-on-surface-variant mb-1">Active Nodes</div>
+<div class="font-headline-lg text-headline-lg text-secondary">48</div>
+<div class="flex gap-1 mt-2 h-4 items-end">
+<div class="w-full bg-secondary/30 h-[40%] rounded-sm"></div>
+<div class="w-full bg-secondary/50 h-[70%] rounded-sm"></div>
+<div class="w-full bg-secondary/80 h-[50%] rounded-sm"></div>
+<div class="w-full bg-secondary h-[90%] rounded-sm"></div>
+<div class="w-full bg-secondary/60 h-[60%] rounded-sm"></div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="glass-card animate-float-3 absolute top-[20%] right-[-10%] p-4 rounded-xl w-48 rotate-[4deg]">
+<div class="font-label-sm text-label-sm text-on-surface-variant mb-1">Latency</div>
+<div class="font-headline-lg text-headline-lg text-tertiary">142ms</div>
+<svg class="mt-2" height="20" viewbox="0 0 100 20" width="100%">
+<path d="M0,15 Q10,5 20,10 T40,15 T60,5 T80,12 T100,8" fill="none" stroke="#ffb596" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</section>
+<!-- Dashboard App Shell Frame -->
+<section class="glass-card rounded-2xl overflow-hidden shadow-2xl relative z-20 border border-white/10 mt-16 max-w-6xl mx-auto">
+<div class="flex h-[800px]">
+<!-- Sidebar Nav (Inside Dashboard) -->
+<aside class="w-64 bg-surface-container-low/80 dark:bg-surface-container-low/80 backdrop-blur-md border-r border-white/5 flex flex-col h-full py-gutter hidden md:flex">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined">dashboard</span>
+</div>
+<div>
+<div class="font-label-md text-label-md font-bold text-on-surface">Admin Console</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Project Nova-X</div>
+</div>
+</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant px-6 mb-2 uppercase tracking-wider">Analytics</div>
+<nav class="flex-1 space-y-1 px-4">
+<a class="bg-primary-container text-on-primary-container rounded-lg mx-2 flex items-center gap-3 px-3 py-2 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                            Overview
+                        </a>
+<a class="text-on-surface-variant hover:text-on-surface px-4 py-2 hover:bg-white/5 transition-all duration-300 ease-in-out rounded-lg flex items-center gap-3 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">memory</span>
+                            Infrastructure
+                        </a>
+<a class="text-on-surface-variant hover:text-on-surface px-4 py-2 hover:bg-white/5 transition-all duration-300 ease-in-out rounded-lg flex items-center gap-3 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">dns</span>
+                            Compute
+                        </a>
+<a class="text-on-surface-variant hover:text-on-surface px-4 py-2 hover:bg-white/5 transition-all duration-300 ease-in-out rounded-lg flex items-center gap-3 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+                            Security
+                        </a>
+</nav>
+<div class="mt-auto px-4">
+<a class="text-on-surface-variant hover:text-on-surface px-4 py-2 hover:bg-white/5 transition-all duration-300 ease-in-out rounded-lg flex items-center gap-3 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">settings</span>
+                            Settings
+                        </a>
+</div>
+</aside>
+<!-- Main Dashboard Area -->
+<div class="flex-1 bg-surface-dim/90 flex flex-col overflow-hidden">
+<!-- Dashboard Top Bar -->
+<header class="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-surface-container-low/50">
+<h2 class="font-headline-lg text-headline-lg text-on-surface text-xl">Overview</h2>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-size: 18px;">search</span>
+<input class="bg-surface-container/50 border border-white/10 rounded-full py-1.5 pl-10 pr-4 font-label-sm text-label-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 w-64" placeholder="Search deployments..." type="text"/>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center font-label-sm text-label-sm font-bold border border-white/10">JD</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="p-6 overflow-y-auto space-y-6">
+<!-- Top Metrics Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Metric 1 -->
+<div class="glass-panel p-4 rounded-xl border border-white/5">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Total Requests</span>
+<span class="material-symbols-outlined text-on-surface-variant" style="font-size: 16px;">more_horiz</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface text-2xl">4.2M</span>
+<span class="font-label-sm text-label-sm text-primary flex items-center"><span class="material-symbols-outlined" style="font-size: 14px;">trending_up</span> +3.2%</span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="glass-panel p-4 rounded-xl border border-white/5">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Active Nodes</span>
+<span class="material-symbols-outlined text-on-surface-variant" style="font-size: 16px;">more_horiz</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface text-2xl">128</span>
+<span class="font-label-sm text-label-sm text-secondary flex items-center"><span class="material-symbols-outlined" style="font-size: 14px;">trending_up</span> +12</span>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="glass-panel p-4 rounded-xl border border-white/5">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Avg Latency</span>
+<span class="material-symbols-outlined text-on-surface-variant" style="font-size: 16px;">more_horiz</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface text-2xl">42ms</span>
+<span class="font-label-sm text-label-sm text-tertiary flex items-center"><span class="material-symbols-outlined" style="font-size: 14px;">trending_down</span> -5ms</span>
+</div>
+</div>
+<!-- Metric 4 -->
+<div class="glass-panel p-4 rounded-xl border border-white/5">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Error Rate</span>
+<span class="material-symbols-outlined text-on-surface-variant" style="font-size: 16px;">more_horiz</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface text-2xl">0.01%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center"><span class="material-symbols-outlined" style="font-size: 14px;">trending_flat</span> 0%</span>
+</div>
+</div>
+</div>
+<!-- Main Chart Area -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Large Chart -->
+<div class="lg:col-span-2 glass-panel p-6 rounded-xl border border-white/5 relative">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-body-lg text-body-lg text-on-surface">System Health &amp; Load</h3>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center border border-white/10 hover:bg-white/10 cursor-pointer">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-size: 18px;">download</span>
+</div>
+</div>
+<div class="h-64 w-full relative mt-4">
+<!-- Simple SVG Chart Mockup -->
+<svg height="100%" preserveaspectratio="none" viewbox="0 0 800 250" width="100%">
+<defs>
+<lineargradient id="blue-gradient" x1="0" x2="1" y1="0" y2="0">
+<stop offset="0%" stop-color="#2563eb"></stop>
+<stop offset="100%" stop-color="#b4c5ff"></stop>
+</lineargradient>
+<lineargradient id="area-gradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#2563eb" stop-opacity="0.5"></stop>
+<stop offset="100%" stop-color="#050816" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid -->
+<line class="chart-grid" x1="0" x2="800" y1="50" y2="50"></line>
+<line class="chart-grid" x1="0" x2="800" y1="100" y2="100"></line>
+<line class="chart-grid" x1="0" x2="800" y1="150" y2="150"></line>
+<line class="chart-grid" x1="0" x2="800" y1="200" y2="200"></line>
+<!-- Area -->
+<path class="chart-area" d="M0,250 L0,150 C100,100 200,200 300,120 C400,40 500,160 600,100 C700,40 800,120 800,120 L800,250 Z"></path>
+<!-- Line -->
+<path class="chart-line" d="M0,150 C100,100 200,200 300,120 C400,40 500,160 600,100 C700,40 800,120 800,120"></path>
+<!-- Data Points -->
+<circle cx="300" cy="120" fill="#ffffff" filter="drop-shadow(0 0 4px #b4c5ff)" r="4"></circle>
+<circle cx="600" cy="100" fill="#ffffff" filter="drop-shadow(0 0 4px #b4c5ff)" r="4"></circle>
+<!-- Y Axis Labels -->
+<text fill="#8d90a0" font-family="Geist" font-size="10" x="0" y="45">24k</text>
+<text fill="#8d90a0" font-family="Geist" font-size="10" x="0" y="95">20k</text>
+<text fill="#8d90a0" font-family="Geist" font-size="10" x="0" y="145">16k</text>
+<text fill="#8d90a0" font-family="Geist" font-size="10" x="0" y="195">12k</text>
+</svg>
+<!-- X Axis Labels (HTML for positioning) -->
+<div class="absolute bottom-0 w-full flex justify-between px-8 text-[#8d90a0] font-label-sm text-[10px] transform translate-y-6">
+<span>1AM</span>
+<span>2AM</span>
+<span>3AM</span>
+<span>4AM</span>
+<span>5AM</span>
+<span>6AM</span>
+<span>7AM</span>
+</div>
+<!-- Floating Bar Chart underlying -->
+<div class="absolute bottom-6 w-full flex justify-between px-8 items-end opacity-30 h-24">
+<div class="w-2 bg-primary/40 rounded-t h-[40%]"></div>
+<div class="w-2 bg-primary/40 rounded-t h-[60%]"></div>
+<div class="w-2 bg-primary/40 rounded-t h-[30%]"></div>
+<div class="w-2 bg-primary/40 rounded-t h-[80%]"></div>
+<div class="w-2 bg-primary/40 rounded-t h-[50%]"></div>
+<div class="w-2 bg-primary/40 rounded-t h-[70%]"></div>
+<div class="w-2 bg-primary/40 rounded-t h-[90%]"></div>
+<div class="w-2 bg-primary/40 rounded-t h-[40%]"></div>
+<div class="w-2 bg-primary/40 rounded-t h-[60%]"></div>
+<div class="w-2 bg-primary/40 rounded-t h-[30%]"></div>
+<div class="w-2 bg-primary/40 rounded-t h-[80%]"></div>
+<div class="w-2 bg-primary/40 rounded-t h-[50%]"></div>
+</div>
+</div>
+</div>
+<!-- Right Column: Donut & Actions -->
+<div class="space-y-6">
+<!-- Traffic Source Donut -->
+<div class="glass-panel p-6 rounded-xl border border-white/5 h-64 flex flex-col relative">
+<h3 class="font-body-lg text-body-lg text-on-surface mb-4">Traffic Routing</h3>
+<div class="flex-1 flex items-center justify-center relative">
+<!-- SVG Donut -->
+<svg class="rotate-[-90deg]" height="120" viewbox="0 0 120 120" width="120">
+<!-- Base track -->
+<circle cx="60" cy="60" fill="none" r="50" stroke="rgba(255,255,255,0.05)" stroke-width="12"></circle>
+<!-- US East -->
+<circle cx="60" cy="60" fill="none" r="50" stroke="#2563eb" stroke-dasharray="314" stroke-dashoffset="100" stroke-width="12"></circle>
+<!-- EU West -->
+<circle cx="60" cy="60" fill="none" r="50" stroke="#adc6ff" stroke-dasharray="314" stroke-dashoffset="220" stroke-width="12"></circle>
+<!-- AP South -->
+<circle cx="60" cy="60" fill="none" r="50" stroke="#0053db" stroke-dasharray="314" stroke-dashoffset="280" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center flex-col">
+<span class="font-headline-lg text-headline-lg text-on-surface text-xl">65%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-[10px]">US East</span>
+</div>
+</div>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2">
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant text-[10px]">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span> US East
+                                        </div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant text-[10px]">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> EU West
+                                        </div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant text-[10px]">
+<span class="w-2 h-2 rounded-full bg-inverse-primary"></span> AP South
+                                        </div>
+</div>
+</div>
+<!-- Action Buttons Area (Simulating destructive/constructive actions) -->
+<div class="grid grid-cols-2 gap-4 h-full">
+<button class="bg-error/10 border border-error/30 text-error hover:bg-error/20 rounded-xl p-4 flex flex-col items-center justify-center transition-colors font-label-md">
+<span class="material-symbols-outlined mb-2">warning</span>
+                                        Failover Test
+                                    </button>
+<button class="bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 rounded-xl p-4 flex flex-col items-center justify-center transition-colors font-label-md">
+<span class="material-symbols-outlined mb-2">sync</span>
+                                        Sync Nodes
+                                    </button>
+</div>
+</div>
+</div>
+<!-- System Status Row -->
+<div class="glass-panel p-4 rounded-xl border border-white/5 flex items-center justify-between">
+<div class="font-label-md text-label-md font-bold text-on-surface">System Status</div>
+<div class="flex gap-6">
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+</span>
+                                     Frontend
+                                 </div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+</span>
+                                     API Gateway
+                                 </div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+</span>
+                                     DB Cluster
+                                 </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest py-12 border-t border-outline-variant w-full mt-24 relative z-10">
+<div class="max-w-container-max mx-auto px-gutter grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface mb-4 flex items-center gap-2 text-xl">
+<img alt="NovaCloud Logo" class="h-6 w-6 rounded" src="https://lh3.googleusercontent.com/aida/AP1WRLtEyemXoQcKyf6akWpBrqCzwkym1vS3C-j7lYeVcwkYANjxnToG8_a9xmVfbt5P-IDUbejYBDS9ORoBVRhLNmYSuAtzsyFk2SHqa3N8wrP2oX0fEuhgzC4UlyzgUsHz7FfRWyR9Wh7olIOp7sMSSC_EAVFGewo6GSOKHoAL2zZt9nnW4QiArV12TM07FAoyW_G_rpqmseeNMsRA-Dimvhnb4w6x4gkUSeAGycm66b3ZReWSffiB9BW2ZP0"/>
+                    NovaCloud
+                </div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-6 w-4/5">
+                    Building the future of resilient, automated infrastructure for modern engineering teams.
+                </p>
+<div class="text-on-surface-variant font-label-sm text-label-sm">
+                    © 2025 NovaCloud Systems. All rights reserved.
+                </div>
+</div>
+<div class="flex flex-col gap-3 font-body-md text-body-md">
+<div class="font-bold text-on-surface mb-2">Product</div>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">Features</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">Integrations</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">Pricing</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">Changelog</a>
+</div>
+<div class="flex flex-col gap-3 font-body-md text-body-md">
+<div class="font-bold text-on-surface mb-2">Resources</div>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">Documentation</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">API Status</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">Blog</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">Community</a>
+</div>
+<div class="flex flex-col gap-3 font-body-md text-body-md">
+<div class="font-bold text-on-surface mb-2">Legal</div>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">Terms of Service</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">Security</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors opacity-100 hover:opacity-80" href="#">Support</a>
+</div>
+</div>
+</footer>
+</body></html>

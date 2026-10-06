@@ -1,0 +1,19 @@
+{
+  "name": "nexus-backend",
+  "version": "1.0.0",
+  "description": "Nexus chaos engineering and self-healing control server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test:integration": "node scripts/integrationCheck.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dockerode": "^4.0.2",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "groq-sdk": "^0.15.0",
+    "pg": "^8.13.1"
+  }
+}

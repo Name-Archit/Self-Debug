@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-body-md text-on-surface antialiased overflow-x-hidden relative;
+    background-color: #050816;
+    background-image: radial-gradient(
+      circle at 50% -20%,
+      rgba(37, 99, 235, 0.15) 0%,
+      rgba(5, 8, 22, 1) 50%
+    );
+    background-attachment: fixed;
+    color: #e1e2ed;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    background: rgba(17, 24, 39, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .glass-card {
+    background: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5);
+  }
+
+  .glow-text {
+    text-shadow: 0 0 20px rgba(180, 197, 255, 0.5);
+  }
+
+  .primary-gradient-text {
+    background: linear-gradient(to right, #b4c5ff, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #2563eb, #0053db);
+    box-shadow:
+      0 10px 15px -3px rgba(37, 99, 235, 0.3),
+      inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    box-shadow:
+      0 15px 25px -5px rgba(37, 99, 235, 0.5),
+      inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .chart-line {
+    stroke: url(#blue-gradient);
+    stroke-width: 2;
+    fill: none;
+    filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.5));
+  }
+
+  .chart-area {
+    fill: url(#area-gradient);
+    opacity: 0.2;
+  }
+
+  .chart-grid {
+    stroke: rgba(255, 255, 255, 0.05);
+    stroke-dasharray: 4 4;
+    stroke-width: 1;
+  }
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}

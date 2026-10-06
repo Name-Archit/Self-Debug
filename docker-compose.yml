@@ -1,0 +1,59 @@
+services:
+  nexus-backend:
+    build: ./backend
+    container_name: nexus-backend
+    ports:
+      - "5000:5000"
+    env_file: ./backend/.env
+    environment:
+      NEXUS_CONTAINER: nexus-backend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      target-backend:
+        condition: service_started
+      target-db:
+        condition: service_healthy
+    networks: [nexus-network]
+
+  target-frontend:
+    build: ./frontend
+    container_name: target-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - nexus-backend
+    networks: [nexus-network]
+
+  target-backend:
+    build: ./backend/fixtures/target-backend
+    image: nexus-target-backend:latest
+    container_name: target-backend
+    environment:
+      DB_HOST: target-db
+      DB_PORT: 5432
+      DB_NAME: nexus_target
+      DB_USER: nexus
+      DB_PASSWORD: nexus_secret
+    depends_on:
+      target-db:
+        condition: service_healthy
+    networks: [nexus-network]
+
+  target-db:
+    image: postgres:16-alpine
+    container_name: target-db
+    environment:
+      POSTGRES_DB: nexus_target
+      POSTGRES_USER: nexus
+      POSTGRES_PASSWORD: nexus_secret
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexus -d nexus_target"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [nexus-network]
+
+networks:
+  nexus-network:
+    name: nexus-network
