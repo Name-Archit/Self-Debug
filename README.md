@@ -87,7 +87,7 @@ Nexus supports three controlled failure scenarios:
 ### Run
 
 ```bash
-git clone <YOUR_REPOSITORY_URL>
+git clone <REPOSITORY_URL>
 cd nexus
 docker compose up --build
 ```
