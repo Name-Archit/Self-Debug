@@ -25,10 +25,39 @@ async function restore(service, probableCause) {
   }
 
   if (service === config.targetDatabase) {
-    return dockerService.startContainer(config.targetDatabase);
+    const dbRes = await dockerService.startContainer(config.targetDatabase);
+    // If target-backend exited when DB went down, ensure target-backend is also running
+    const backendStatus = await dockerService.getContainerStatus(config.targetBackend);
+    if (!backendStatus.running) {
+      await dockerService.startContainer(config.targetBackend);
+    }
+    return dbRes;
   }
 
   return null;
+}
+
+async function waitForReadiness(failedService, isLatency) {
+  const maxAttempts = 15;
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((r) => setTimeout(r, 500));
+    const status = await statusService.getSystemStatus();
+    
+    if (isLatency) {
+      if (status.services.backend.health === 'healthy' && status.services.backend.responseTimeMs <= config.latencyThresholdMs) {
+        return true;
+      }
+    } else if (failedService === config.targetDatabase) {
+      if (status.services.database.health === 'healthy' && status.services.backend.health === 'healthy') {
+        return true;
+      }
+    } else if (failedService === config.targetBackend) {
+      if (status.services.backend.health === 'healthy') {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 async function rebuild() {
@@ -37,8 +66,9 @@ async function rebuild() {
   if (diagnosis.isMultipleFailures) {
     return {
       success: false,
+      failureType: 'MULTIPLE_FAILURES',
       diagnosis,
-      message: 'Multiple simultaneous failures are not supported by the MVP. Reset the environment and repair one failure at a time.',
+      message: 'Multiple failures detected. Reset and repair one failure at a time.',
       productionRestored: false,
     };
   }
@@ -46,67 +76,45 @@ async function rebuild() {
   if (!diagnosis.failedService) {
     return {
       success: true,
+      failureType: 'NONE',
       diagnosis,
       message: 'No failure detected',
+      appliedFix: 'System is already healthy',
+      verified: true,
       productionRestored: true,
     };
   }
 
-  timelineService.addEvent(`Failure detected: ${diagnosis.failedService}`);
+  const isLatency = diagnosis.probableCause && diagnosis.probableCause.toLowerCase().includes('latency');
+  const failureType = isLatency
+    ? 'HIGH_LATENCY'
+    : diagnosis.failedService === config.targetDatabase
+    ? 'DATABASE_DOWN'
+    : 'BACKEND_DOWN';
 
-  const isDbFailure = diagnosis.failedService === config.targetDatabase;
-  let sandbox = null;
+  timelineService.addEvent(`Deterministic repair initiated for ${failureType}`);
 
-  try {
-    sandbox = await sandboxService.create({ isDbFailure });
-    timelineService.addEvent('Validation started');
+  const restoreResult = await restore(diagnosis.failedService, diagnosis.probableCause);
+  const isReady = await waitForReadiness(diagnosis.failedService, isLatency);
 
-    const validation = await validationService.validate({ isDbFailure });
+  const postStatus = await statusService.getSystemStatus();
+  const verified = isReady && postStatus.overallStatus === 'healthy';
 
-    if (validation.result !== 'PASS') {
-      await sandboxService.remove();
-      timelineService.addEvent('Validation failed; sandbox removed');
-
-      return {
-        success: false,
-        diagnosis,
-        sandbox,
-        validation,
-        productionRestored: false,
-      };
-    }
-
-    timelineService.addEvent('Validation passed');
-
-    const restoreResult = await restore(diagnosis.failedService, diagnosis.probableCause);
-
-    // Verify production health post-restoration
-    await new Promise((r) => setTimeout(r, 1000));
-    const postStatus = await statusService.getSystemStatus();
-    const isProductionHealthy = postStatus.overallStatus === 'healthy';
-
-    await sandboxService.remove();
-
-    if (isProductionHealthy) {
-      timelineService.addEvent('Production restored');
-    } else {
-      timelineService.addEvent('Production restoration completed');
-    }
-
-    return {
-      success: true,
-      diagnosis,
-      sandbox,
-      validation,
-      productionRestored: true,
-      restoreResult,
-    };
-  } catch (error) {
-    if (sandbox) {
-      await sandboxService.remove().catch(() => {});
-    }
-    throw error;
+  if (verified) {
+    timelineService.addEvent(`Deterministic repair verified: System healthy`);
+  } else {
+    timelineService.addEvent(`Deterministic repair warning: Readiness check unverified`);
   }
+
+  return {
+    success: verified,
+    failureType,
+    diagnosis,
+    appliedFix: restoreResult?.action ? `Executed ${restoreResult.action}` : `Restored ${diagnosis.failedService}`,
+    verified,
+    productionRestored: verified,
+    restoreResult,
+  };
 }
 
 module.exports = { rebuild };

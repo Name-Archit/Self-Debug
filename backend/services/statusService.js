@@ -47,10 +47,6 @@ function mapContainerHealth(containerStatus, httpHealth, latencyMs) {
     return 'healthy';
   }
 
-  if (containerStatus.running) {
-    return 'healthy';
-  }
-
   return 'unhealthy';
 }
 
@@ -66,6 +62,7 @@ async function getSystemStatus() {
     ]);
 
   const frontend = {
+    running: frontendContainer.running,
     status: frontendContainer.running ? 'running' : (frontendHealth.ok ? 'reachable' : frontendContainer.status),
     health: mapContainerHealth(frontendContainer, frontendHealth, frontendHealth.responseTimeMs),
     responseTimeMs: frontendHealth.responseTimeMs,
@@ -73,6 +70,7 @@ async function getSystemStatus() {
   };
 
   const backend = {
+    running: backendContainer.running,
     status: backendContainer.running ? 'running' : (backendHealth.ok ? 'reachable' : backendContainer.status),
     health: mapContainerHealth(backendContainer, backendHealth, backendHealth.responseTimeMs),
     responseTimeMs: backendHealth.responseTimeMs,
@@ -81,6 +79,7 @@ async function getSystemStatus() {
   };
 
   const database = {
+    running: dbContainer.running,
     status: dbContainer.running ? 'running' : (dbHealth.reachable ? 'reachable' : dbContainer.status),
     health: dbHealth.reachable ? 'healthy' : 'unhealthy',
     responseTimeMs: dbHealth.responseTimeMs,

@@ -10,6 +10,9 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   connectionTimeoutMillis: 3000,
 });
+pool.on('error', (err) => {
+  console.error('Target backend database pool error:', err.message);
+});
 const delay = () => new Promise((resolve) => setTimeout(resolve, Number(process.env.LATENCY_MS || 0)));
 app.get('/health', async (req, res) => {
   await delay();

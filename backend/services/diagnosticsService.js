@@ -4,48 +4,50 @@ const config = require('../config');
 function diagnosisFor(status) {
   const { backend, database } = status.services;
 
-  const isBackendDown = !backend.running || backend.status !== 'running';
-  const isDbDown = !database.health || database.health === 'unhealthy';
-  const isLatencyHigh = backend.running && backend.health === 'degraded';
+  const isBackendStopped = !backend.running || backend.status !== 'running';
+  const isDbStopped = !database.health || database.status === 'exited' || database.status === 'not_found' || database.status === 'stopped';
+  const isLatencyHigh = backend.running && (backend.health === 'degraded' || backend.latencyMode || (backend.responseTimeMs && backend.responseTimeMs > config.latencyThresholdMs));
 
-  let failureCount = 0;
-  if (isBackendDown) failureCount++;
-  if (isDbDown) failureCount++;
-  if (isLatencyHigh) failureCount++;
-
-  if (failureCount > 1) {
-    return {
-      isMultipleFailures: true,
-      failedService: null,
-      probableCause: 'Multiple simultaneous failures detected',
-      recommendedRepair: 'Reset the environment and repair one failure at a time.',
-    };
-  }
-
-  if (isBackendDown) {
+  // If DB container is stopped, backend HTTP health check returns unhealthy (503). That is a single DB failure.
+  if (isDbStopped && !isBackendStopped) {
     return {
       isMultipleFailures: false,
-      failedService: 'target-backend',
-      probableCause: 'Backend container is stopped or exited',
-      recommendedRepair: 'start backend container',
-    };
-  }
-
-  if (isDbDown) {
-    return {
-      isMultipleFailures: false,
-      failedService: 'target-db',
+      failedService: config.targetDatabase,
       probableCause: 'Database container is stopped or PostgreSQL is unavailable',
       recommendedRepair: 'start database container',
+    };
+  }
+
+  // If Backend container itself is stopped
+  if (isBackendStopped && !isDbStopped) {
+    return {
+      isMultipleFailures: false,
+      failedService: config.targetBackend,
+      probableCause: 'Backend container is stopped or exited',
+      recommendedRepair: 'start backend container',
     };
   }
 
   if (isLatencyHigh) {
     return {
       isMultipleFailures: false,
-      failedService: 'target-backend',
+      failedService: config.targetBackend,
       probableCause: 'Backend response latency exceeds the configured limit',
-      recommendedRepair: 'disable latency mode and restart backend',
+      recommendedRepair: 'disable latency mode',
+    };
+  }
+
+  // If both containers are stopped or multiple independent failures exist
+  let stoppedCount = 0;
+  if (isBackendStopped) stoppedCount++;
+  if (isDbStopped) stoppedCount++;
+
+  if (stoppedCount > 1) {
+    return {
+      isMultipleFailures: true,
+      failedService: null,
+      probableCause: 'Multiple simultaneous failures detected',
+      recommendedRepair: 'Reset the environment and repair one failure at a time.',
     };
   }
 
