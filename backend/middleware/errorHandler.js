@@ -1,6 +1,13 @@
 const AppError = require('../utils/AppError');
 const logger = require('../utils/logger');
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Self-Debug API is running 🚀"
+  });
+});
+
 function notFoundHandler(req, res, next) {
   next(new AppError(`Route not found: ${req.method} ${req.originalUrl}`, 404, 'ROUTE_NOT_FOUND'));
 }
