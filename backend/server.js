@@ -12,7 +12,15 @@ const logger = require('./utils/logger');
 const app = express();
 
 app.disable('x-powered-by');
-app.use(cors({ origin: config.corsOrigins }));
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://self-debug.vercel.app',
+  ],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
+}));
 app.use(express.json({ limit: '100kb' }));
 app.use(requestLogger);
 
