@@ -42,7 +42,10 @@ const config = Object.freeze({
   },
   healthCheckIntervalMs: number('HEALTH_CHECK_INTERVAL_MS', 5000),
   healthTimeoutMs: number('HEALTH_TIMEOUT_MS', 3000),
-  corsOrigins: required('CORS_ORIGIN').split(',').map((origin) => origin.trim()).filter(Boolean),
+  corsOrigins: [
+  'http://localhost:5173',
+  'https://self-debug.vercel.app',
+],
 });
 
 module.exports = config;
