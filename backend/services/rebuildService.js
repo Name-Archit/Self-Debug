@@ -64,12 +64,19 @@ async function rebuild() {
   const diagnosis = await diagnosticsService.diagnose();
 
   if (diagnosis.isMultipleFailures) {
+    timelineService.addEvent('Multiple failures detected; starting full service recovery');
+    await dockerService.startContainer(config.targetDatabase);
+    await dockerService.startContainer(config.targetBackend);
+    await dockerService.startContainer(config.targetFrontend);
+    const restored = await waitForFullReadiness();
+    timelineService.addEvent(restored ? 'Full service recovery completed' : 'Full service recovery started; health checks are still pending');
     return {
-      success: false,
+      success: restored,
       failureType: 'MULTIPLE_FAILURES',
       diagnosis,
-      message: 'Multiple failures detected. Reset and repair one failure at a time.',
-      productionRestored: false,
+      appliedFix: 'Started database, backend, and frontend containers',
+      verified: restored,
+      productionRestored: restored,
     };
   }
 
@@ -115,6 +122,16 @@ async function rebuild() {
     productionRestored: verified,
     restoreResult,
   };
+}
+
+async function waitForFullReadiness() {
+  const maxAttempts = 20;
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const status = await statusService.getSystemStatus();
+    if (status.overallStatus === 'healthy') return true;
+  }
+  return false;
 }
 
 module.exports = { rebuild };
