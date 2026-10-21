@@ -1,90 +1,61 @@
+Exactly — I know what you mean. The previous one is **technically clean but sounds like documentation generated to explain a concept**, rather than a README someone actually wrote for their GitHub project.
+
+I'd make it more casual, direct, and project-focused. Something like this:
+
 ```markdown
 # Nexus
 
-### Deterministic Self-Healing Infrastructure
+Nexus is a small self-healing system built with Docker.
 
-Nexus is a Docker-based self-healing platform that detects controlled application failures, applies the appropriate recovery action, and verifies that the system has recovered.
+The idea is simple: I can break parts of a running application on purpose, and Nexus detects the problem, fixes it, and checks if everything is working again.
 
-The project demonstrates the core self-healing loop:
+### What it can fix
 
-**Break → Detect → Repair → Verify**
+- **Backend** — stops the backend and starts it again
+- **Database** — stops PostgreSQL and brings it back
+- **Latency** — adds a delay to the backend and removes it during recovery
 
----
-
-## Features
-
-- 🔴 **Backend Failure** — stops the target backend and automatically restarts it.
-- 🗄️ **Database Failure** — stops PostgreSQL and restores it when Rebuild is triggered.
-- ⏱️ **Latency Injection** — introduces artificial latency and removes it during recovery.
-- 🔄 **Automatic Rebuild** — detects the current failure and applies the correct fix.
-- ✅ **Recovery Verification** — confirms the service is actually healthy after recovery.
-- 📜 **Recovery Timeline** — shows what happened during the recovery process.
-- 🐳 **Dockerized** — the complete system runs through Docker Compose.
-
----
-
-## How It Works
+The main flow is:
 
 ```text
-       Failure Injected
-              ↓
-      Detect the Failure
-              ↓
-     Identify Failure Type
-              ↓
-        Apply Fix
-              ↓
-      Verify Recovery
-              ↓
-           Healthy
+Break → Detect → Rebuild → Check → Healthy
 ```
 
-Nexus supports three controlled failure scenarios:
+## Tech Stack
 
-| Failure | Recovery |
+- React + Vite
+- Node.js + Express
+- PostgreSQL
+- Docker + Docker Compose
+- Nginx
+
+## How it works
+
+The project has a small target application running in Docker, and Nexus sits alongside it.
+
+```text
+             Nexus
+               │
+        ┌──────┼──────┐
+        ↓      ↓      ↓
+     Frontend Backend Database
+```
+
+From the Nexus dashboard, I can trigger a failure and then click **Rebuild**.
+
+Nexus checks what went wrong and uses the matching recovery:
+
+| Problem | Fix |
 |---|---|
-| Backend stopped | Start backend + verify health |
-| Database stopped | Start database + verify connectivity |
-| High latency | Reset latency + verify response time |
+| Backend is down | Start backend |
+| Database is down | Start database |
+| Too much latency | Remove injected latency |
 
----
+After fixing it, Nexus runs health checks before showing the system as healthy.
 
-## Architecture
+## Run it
 
-```text
-                  Nexus Dashboard
-                         │
-                         ▼
-                 Nexus Backend
-                    Express.js
-                         │
-                  Docker Socket
-                         │
-          ┌──────────────┼──────────────┐
-          ▼              ▼              ▼
-     Frontend         Backend        PostgreSQL
-       Nginx          Express          Database
-```
-
-### Tech Stack
-
-- **Frontend:** React + Vite
-- **Backend:** Node.js + Express
-- **Database:** PostgreSQL
-- **Infrastructure:** Docker + Docker Compose
-- **Docker Control:** Dockerode
-- **Web Server:** Nginx
-
----
-
-## Getting Started
-
-### Requirements
-
-- Docker Desktop
-- Git
-
-### Run
+You only need Docker Desktop.
 
 ```bash
 git clone <YOUR_REPOSITORY_URL>
@@ -92,24 +63,29 @@ cd nexus
 docker compose up --build
 ```
 
-Open:
+Then open:
 
 ```text
 http://localhost:8080
 ```
 
----
-
 ## Demo
 
-1. Start Nexus and confirm the system is **Healthy**.
-2. Click **Break Backend**, **Break Database**, or **Inject Latency**.
-3. Observe the system becoming unhealthy.
-4. Click **Rebuild**.
-5. Nexus detects the failure and applies the corresponding recovery.
-6. Nexus verifies the recovery and returns the system to **Healthy**.
+A typical test looks like this:
 
-The recovery can be repeated without restarting the entire application:
+```text
+1. Start Nexus
+2. Click "Break Backend"
+3. System becomes unhealthy
+4. Click "Rebuild"
+5. Nexus fixes the backend
+6. Health checks pass
+7. System is healthy again
+```
+
+The same process works for the database and latency failures.
+
+It can also be repeated:
 
 ```text
 Break → Rebuild → Healthy
@@ -117,39 +93,25 @@ Break → Rebuild → Healthy
 Break → Rebuild → Healthy
 ```
 
----
+without restarting the whole project.
 
-## Safety
+## Why I built it
 
-Nexus does not consider a service recovered simply because its Docker container is running.
+I wanted to build something where Docker was doing more than just running the application.
 
-Recovery is only successful after verification:
-
-- Backend → health and API checks
-- Database → database connectivity
-- Latency → fresh response-time check
-
-> **Recovery is not complete until it has been verified.**
-
----
+Nexus is a simple way to experiment with failure recovery and see how a system can detect a problem and recover from it automatically.
 
 ## Project Scope
 
-Nexus is a **portfolio MVP** focused on deterministic self-healing.
+This is a portfolio MVP, so the recovery actions are intentionally simple and predefined.
 
-It intentionally does not use Kubernetes, Prometheus, Grafana, Redis, Kafka, or other unnecessary infrastructure.
-
-The goal is to demonstrate the fundamental concept clearly:
-
-> **Detect a failure, fix it automatically, and prove that the fix worked.**
-
----
+It is not meant to be a production monitoring or orchestration platform.
 
 ## Author
 
 **Archit**
-
-Built as a portfolio project exploring resilient systems, Docker automation, and self-healing infrastructure.
 ```
 
-This is the version I'd actually put on GitHub. It's **short enough to read in 1–2 minutes**, but still tells a recruiter/interviewer what Nexus is, how it works, what technologies you used, and how to run the demo.
+This feels much more like **“here's the project I built”** and much less like **“here is an AI-generated technical explanation of self-healing infrastructure.”**
+
+I'd use **this version** for your GitHub.
