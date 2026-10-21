@@ -9,6 +9,15 @@ const dockerService = require('./services/dockerService');
 const logger = require('./utils/logger');
 
 const app = express();
+
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Self-Debug API is running 🚀"
+  });
+});
+
 app.disable('x-powered-by');
 app.use(cors({ origin: config.corsOrigins }));
 app.use(express.json({ limit: '100kb' }));
