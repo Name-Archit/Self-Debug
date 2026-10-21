@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_NEXUS_API_URL || '/api';
+const API_BASE = 'https://self-debug.onrender.com/api';
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, { headers: { 'content-type': 'application/json', ...(options.headers || {}) }, ...options });
