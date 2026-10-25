@@ -115,7 +115,7 @@ It is not meant to be a production monitoring or orchestration platform.
 
 ## Author
 
-**Archit**
+**Archit Niranjan**
 ```
 
 <<<<<<< HEAD
