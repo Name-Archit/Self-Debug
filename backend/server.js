@@ -55,7 +55,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const server = app.listen(config.port, async () => {
-  logger.info('Nexus control server started', { port: config.port });
+  logger.info('Nexus control server started', { port: config.port, chaosMode: config.chaosMode });
   await dockerService.verifyConnection();
   monitorService.start();
 });
