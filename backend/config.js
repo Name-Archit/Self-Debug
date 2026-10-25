@@ -12,6 +12,14 @@ function number(name, fallback) {
   return value;
 }
 
+function choice(name, fallback, allowed) {
+  const value = (process.env[name] || fallback).trim().toLowerCase();
+  if (!allowed.includes(value)) {
+    throw new Error(`Environment variable ${name} must be one of: ${allowed.join(', ')}.`);
+  }
+  return value;
+}
+
 function getDockerSocket() {
   const envVal = process.env.DOCKER_SOCKET;
   const isWin = process.platform === 'win32';
@@ -25,6 +33,9 @@ const config = Object.freeze({
   groqApiKey: process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.trim() : '',
   groqModel: process.env.GROQ_MODEL ? process.env.GROQ_MODEL.trim() : 'llama-3.3-70b-versatile',
   port: number('PORT', 5000),
+  // Docker is the real local/Compose control plane. Render cannot mount a Docker
+  // socket, so it must opt into the explicitly-labelled hosted simulation mode.
+  chaosMode: choice('CHAOS_MODE', 'docker', ['docker', 'simulated']),
   targetFrontend: required('TARGET_FRONTEND'),
   targetBackend: required('TARGET_BACKEND'),
   targetDatabase: required('TARGET_DATABASE'),

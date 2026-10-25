@@ -2,6 +2,7 @@ const dockerService = require('./dockerService');
 const databaseService = require('./databaseService');
 const logger = require('../utils/logger');
 const config = require('../config');
+const simulationService = require('./simulationService');
 
 const latencyState = {
   enabled: false,
@@ -51,6 +52,11 @@ function mapContainerHealth(containerStatus, httpHealth, latencyMs) {
 }
 
 async function getSystemStatus() {
+  if (config.chaosMode === 'simulated') {
+    const status = simulationService.getStatus();
+    cachedStatus = status;
+    return status;
+  }
   const [frontendContainer, backendContainer, dbContainer, frontendHealth, backendHealth, dbHealth] =
     await Promise.all([
       dockerService.getContainerStatus(config.targetFrontend),

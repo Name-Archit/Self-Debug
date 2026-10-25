@@ -5,6 +5,7 @@ const dockerService = require('./dockerService');
 const statusService = require('./statusService');
 const timelineService = require('./timelineService');
 const config = require('../config');
+const simulationService = require('./simulationService');
 
 async function restore(service, probableCause) {
   if (probableCause && probableCause.toLowerCase().includes('latency')) {
@@ -62,6 +63,19 @@ async function waitForReadiness(failedService, isLatency) {
 
 async function rebuild() {
   const diagnosis = await diagnosticsService.diagnose();
+
+  if (config.chaosMode === 'simulated') {
+    if (!diagnosis.failedService && !diagnosis.isMultipleFailures) {
+      return { success: true, failureType: 'NONE', diagnosis, message: 'System is already healthy', verified: true, productionRestored: true, mode: 'simulated' };
+    }
+    timelineService.addEvent(`Hosted simulation: deterministic repair initiated for ${diagnosis.isMultipleFailures ? 'MULTIPLE_FAILURES' : diagnosis.failedService}`);
+    simulationService.restore();
+    statusService.setLatencyMode(false, 0);
+    const postStatus = await statusService.getSystemStatus();
+    const verified = postStatus.overallStatus === 'healthy';
+    timelineService.addEvent(verified ? 'Hosted simulation: deterministic repair verified' : 'Hosted simulation: repair could not be verified');
+    return { success: verified, failureType: diagnosis.isMultipleFailures ? 'MULTIPLE_FAILURES' : diagnosis.failedService, diagnosis, appliedFix: 'Restored hosted simulated service state', verified, productionRestored: verified, mode: 'simulated' };
+  }
 
   if (diagnosis.isMultipleFailures) {
     timelineService.addEvent('Multiple failures detected; starting full service recovery');

@@ -164,6 +164,15 @@ export default function DashboardPreview() {
           </header>
 
           <div className="p-4 sm:p-6 overflow-y-auto space-y-6">
+            {status?.mode === 'simulated' && (
+              <div className="bg-amber-400/10 border border-amber-400/30 rounded-xl p-3 flex gap-3 items-start">
+                <Icon name="science" className="text-amber-400 mt-0.5" />
+                <p className="text-on-surface-variant text-xs">
+                  Hosted demo mode: failures are safely simulated by Nexus because this deployment has no Docker daemon. Local Compose continues to control real containers.
+                </p>
+              </div>
+            )}
+
             {/* Active Incident Warning Alert */}
             {status?.overallStatus && status.overallStatus !== 'healthy' && (
               <div className="bg-error/15 border border-error/30 rounded-xl p-4 flex gap-3 items-start animate-pulse">

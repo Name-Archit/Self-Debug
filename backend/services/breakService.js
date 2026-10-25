@@ -4,6 +4,7 @@ const timelineService = require('./timelineService');
 const logger = require('../utils/logger');
 const AppError = require('../utils/AppError');
 const config = require('../config');
+const simulationService = require('./simulationService');
 
 async function setTargetLatency(delayMs) {
   const url = new URL('/internal/latency', config.backendHealthUrl).toString();
@@ -13,6 +14,12 @@ async function setTargetLatency(delayMs) {
 
 async function breakBackend() {
   const name = config.targetBackend;
+
+  if (config.chaosMode === 'simulated') {
+    simulationService.stopBackend();
+    timelineService.addEvent('Hosted simulation: backend marked stopped');
+    return { success: true, action: 'break-backend', mode: 'simulated', message: 'Hosted backend failure simulated', timestamp: new Date().toISOString() };
+  }
 
   try {
     await dockerService.stopContainer(name);
@@ -37,6 +44,12 @@ async function breakBackend() {
 async function breakDatabase() {
   const name = config.targetDatabase;
 
+  if (config.chaosMode === 'simulated') {
+    simulationService.stopDatabase();
+    timelineService.addEvent('Hosted simulation: database marked stopped');
+    return { success: true, action: 'break-database', mode: 'simulated', message: 'Hosted database failure simulated', timestamp: new Date().toISOString() };
+  }
+
   try {
     await dockerService.stopContainer(name);
     timelineService.addEvent('Database container stopped via break engine', 'failure', {
@@ -60,6 +73,13 @@ async function breakDatabase() {
 async function breakLatency(delayMs = 3000) {
   const name = config.targetBackend;
   const parsedDelay = parseInt(delayMs, 10) || 3000;
+
+  if (config.chaosMode === 'simulated') {
+    simulationService.setLatency(parsedDelay);
+    statusService.setLatencyMode(true, parsedDelay);
+    timelineService.addEvent(`Hosted simulation: latency mode enabled (${parsedDelay}ms)`);
+    return { success: true, action: 'break-latency', mode: 'simulated', message: `Hosted latency simulation enabled (${parsedDelay}ms delay)`, delayMs: parsedDelay, timestamp: new Date().toISOString() };
+  }
 
   try {
     const current = await dockerService.getContainerStatus(name);
