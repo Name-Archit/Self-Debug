@@ -8,7 +8,6 @@ The idea is simple: I can break parts of a running application on purpose, and N
 DETERMINISTIC SELF-HEALING INFRASTRUCTURE
 
 Nexus is a Docker-based self-healing platform that detects controlled application failures, applies the appropriate recovery action, and verifies recovery.
->>>>>>> 82c613217fac0e013debe508a06fb66ce7963681
 
 ### What it can fix
 
@@ -112,11 +111,3 @@ It is not meant to be a production monitoring or orchestration platform.
 
 **Archit Niranjan**
 ```
-
-<<<<<<< HEAD
-This feels much more like **“here's the project I built”** and much less like **“here is an AI-generated technical explanation of self-healing infrastructure.”**
-
-I'd use **this version** for your GitHub.
-=======
-This is the version I'd actually put on GitHub. It's **short enough to read in 1–2 minutes**, but still tells a recruiter/interviewer what Nexus is, how it works, what technologies you used, and how to run the demo.
->>>>>>> 82c613217fac0e013debe508a06fb66ce7963681
