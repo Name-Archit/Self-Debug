@@ -1,8 +1,3 @@
-Exactly — I know what you mean. The previous one is **technically clean but sounds like documentation generated to explain a concept**, rather than a README someone actually wrote for their GitHub project.
-
-I'd make it more casual, direct, and project-focused. Something like this:
-
-```markdown
 NEXUS
 
 <<<<<<< HEAD
